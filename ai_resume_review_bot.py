@@ -279,7 +279,8 @@ class ResumeBot(commands.Bot):
                     )
                     await message.channel.send(embed=main_embed)
                     user_resume_bytes = await attachment.read()
-                    jake_resume_bytes = open("resumes/jakes-resume.pdf", "rb").read()
+                    with open("resumes/jakes-resume.pdf", "rb") as f:
+                        jake_resume_bytes = f.read()
 
                     try:
                         if self.job_details:
@@ -515,7 +516,7 @@ class ResumeBot(commands.Bot):
                             "overall": final_score,
                             "experiences": avg_expereinces_final_score,
                             "projects": avg_projects_final_score,
-                            "formatting": total_formatting_score
+                            "formatting": overall_score
                         }
                         analytics.track_resume_review(message.author.id, message.guild.id, scores)
                         

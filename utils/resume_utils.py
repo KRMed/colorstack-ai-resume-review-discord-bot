@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import tiktoken
+from json_repair import repair_json
 from pydantic import ValidationError
 from models import ResumeFeedback
 from utils.anthropic_utils import get_chat_completion
@@ -235,7 +236,7 @@ def review_resume(resume_user: bytes, resume_jake: bytes, job_title: str = None,
         additional_feedback = "Your resume is appropriately formatted to fit on a single page."
 
 
-    logger.info("FONT CONSISTENCY: ", font_consistency_feedback['feedback'])
+    logger.info(f"FONT CONSISTENCY: {font_consistency_feedback['feedback']}")
 
     user_prompt = f"""
     Please review this resume for the role of {job_title} at {company}. 
@@ -292,7 +293,7 @@ def review_resume(resume_user: bytes, resume_jake: bytes, job_title: str = None,
         contact_information: {{ issue: boolean, feedback: string, suggestions: [string, string], score: number }},
         overall_layout: {{ issue: boolean, feedback: string, suggestions: [string, string], score: number }},
         page_utilization: {{ issue: boolean, feedback: string, suggestions: [string, string], score: number }},
-        is_single_page: {{ issue: {not is_single_page_user_resume}, feedback: {additional_feedback}, suggestions: [string, string], score: {10 if is_single_page_user_resume else 0} }},
+        is_single_page: {{ issue: {"true" if not is_single_page_user_resume else "false"}, feedback: "{additional_feedback}", suggestions: [string, string], score: {10 if is_single_page_user_resume else 0} }},
         consistency: {{ issue: boolean, feedback: string, suggestions: [string, string], score: number }},
         overall_score: number
     }}
@@ -337,9 +338,15 @@ def review_resume(resume_user: bytes, resume_jake: bytes, job_title: str = None,
             result = json.loads(completion)
             logger.info(f"Parsed result: {result}")
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse JSON from completion: {e}")
-            logger.error(f"Raw completion: {completion}")
-            raise ValueError(f"Invalid JSON response from API: {e}")
+            logger.warning(f"Initial JSON parse failed, attempting repair: {e}")
+            repaired = repair_json(completion)
+            try:
+                result = json.loads(repaired)
+                logger.info("JSON successfully repaired and parsed")
+            except json.JSONDecodeError as e2:
+                logger.error(f"Failed to parse repaired JSON: {e2}")
+                logger.error(f"Raw completion: {completion}")
+                raise ValueError(f"Invalid JSON response from API: {e}")
         
         resume_feedback = ResumeFeedback(**result)
         logger.info("Resume reviewed and feedback generated successfully")

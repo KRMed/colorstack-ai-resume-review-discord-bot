@@ -2,7 +2,7 @@ import json
 from config import ANTHROPIC_API_KEY
 import requests
 import logging
-import asyncio
+import time
 from utils.analytics import analytics  # Import the analytics module
 
 # Function to Get Chat Completion from Anthropic
@@ -49,7 +49,7 @@ def get_chat_completion(max_tokens: int, messages: list, system: str = None, tem
             logging.error("Error during API request attempt %d: %s", attempt + 1, err)
             if attempt < retries - 1:
                 logging.info("Retrying...")
-                asyncio.sleep(2)
+                time.sleep(2)
             else:
                 logging.error("Failed after %d attempts", retries)
                 raise
