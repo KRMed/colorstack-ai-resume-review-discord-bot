@@ -60,7 +60,11 @@ def extract_text_and_formatting(file: bytes) -> dict:
                     for block in page_dict["blocks"]:
                         if "lines" in block:
                             for line in block["lines"]:
+                                if "spans" not in line:
+                                    continue
                                 for span in line["spans"]:
+                                    if not all(k in span for k in ("text", "font", "size", "bbox")):
+                                        continue
                                     formatting_info.append({
                                         "text": span["text"],
                                         "font": span["font"],
