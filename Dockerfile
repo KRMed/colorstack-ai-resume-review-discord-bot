@@ -11,7 +11,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN groupadd -r appuser && useradd -r -g appuser -u 1001 appuser
+RUN groupadd -r appuser && useradd -r -g appuser -u 1001 appuser \
+  && mkdir -p /tmp && chmod 1777 /tmp \
+  && chown -R appuser:appuser /app
+
 USER 1001
 
 ENV PYTHONUNBUFFERED=1
