@@ -10,5 +10,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+RUN groupadd -r appuser && useradd -r -g appuser -u 1001 appuser
+USER 1001
+
 ENV PYTHONUNBUFFERED=1
 CMD ["python", "main.py"]
