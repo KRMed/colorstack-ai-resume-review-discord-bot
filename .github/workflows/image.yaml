@@ -1,7 +1,7 @@
 name: ColorStack Resume Review Bot
 on:
-  push:
-    branches: ["main"]
+  release:
+    types: [published]
 permissions:
   contents: read
   packages: write
@@ -27,4 +27,4 @@ jobs:
           platforms: linux/arm64,linux/amd64
           tags: |
             ghcr.io/krmed/colorstack-ai-resume-review-discord-bot:latest
-            ghcr.io/krmed/colorstack-ai-resume-review-discord-bot:${{ github.sha }}
+            ghcr.io/krmed/colorstack-ai-resume-review-discord-bot:${{ github.event.release.tag_name }}
