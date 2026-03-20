@@ -15,7 +15,7 @@ def get_chat_completion(max_tokens: int, messages: list, system: str = None, tem
     }
     data = {
         'messages': messages,
-        'model': 'claude-sonnet-4-5-20250929',
+        'model': 'claude-sonnet-4-6',
         'max_tokens': max_tokens,
         'temperature': temperature,
     }
